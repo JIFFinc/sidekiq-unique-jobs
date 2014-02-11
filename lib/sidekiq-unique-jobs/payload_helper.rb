@@ -2,8 +2,12 @@ module SidekiqUniqueJobs
   class PayloadHelper
     def self.get_payload(klass, queue, *args)
       args = yield_unique_args(klass, *args) if SidekiqUniqueJobs::Config.unique_args_enabled?
-      md5_arguments = {:class => klass, :queue => queue, :args => args}
-      "#{SidekiqUniqueJobs::Config.unique_prefix}:#{Digest::MD5.hexdigest(Sidekiq.dump_json(md5_arguments))}"
+      md5_arguments = {class: klass, args: args}
+      "#{payload_prefix(queue)}#{Digest::MD5.hexdigest(Sidekiq.dump_json(md5_arguments))}"
+    end
+
+    def self.payload_prefix(queue)
+      "#{SidekiqUniqueJobs::Config.unique_prefix}:#{queue}:"
     end
 
     def self.yield_unique_args(klass, args)

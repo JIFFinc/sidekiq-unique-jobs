@@ -11,6 +11,7 @@ module SidekiqUniqueJobs
           @item = item
 
           if unique_enabled?
+            check_queue
             yield if unique?
           else
             yield
@@ -50,6 +51,20 @@ module SidekiqUniqueJobs
           unique
         end
 
+        def check_queue
+          # remove all unique keys for this queue if queue deleted
+          queue = item['queue']
+          Sidekiq.redis do |conn|
+            if !conn.exists("queue:#{queue}")
+              # there is no queue, remove all uique keys
+              prefix = SidekiqUniqueJobs::PayloadHelper.payload_prefix(queue)
+              conn.keys("#{prefix}*").each do |key|
+                conn.del(key)
+              end
+            end
+          end
+        end
+
         protected
 
         # Attempt to constantize a string worker_class argument, always
@@ -86,7 +101,6 @@ module SidekiqUniqueJobs
         def unique_job_expiration
           worker_class.get_sidekiq_options['unique_job_expiration']
         end
-
       end
     end
   end
