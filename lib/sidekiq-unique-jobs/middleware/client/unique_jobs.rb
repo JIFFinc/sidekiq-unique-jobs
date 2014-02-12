@@ -86,7 +86,7 @@ module SidekiqUniqueJobs
         # When sidekiq/testing is loaded, the Sidekiq::Testing constant is
         # present and testing is enabled.
         def testing_enabled?
-          if Sidekiq.const_defined?('Testing') && Sidekiq::Testing.enabled?
+          if Sidekiq.const_defined?('Testing') && Sidekiq::Testing.enabled? && !Sidekiq::Testing.inline?
             require 'sidekiq-unique-jobs/testing'
             return true
           end
