@@ -29,6 +29,7 @@ module SidekiqUniqueJobs
         end
 
         def unique_for_connection?(conn)
+          return true if Sidekiq::Testing.enabled? && Sidekiq::Testing.inline?
           unique = false
           conn.watch(payload_hash)
 
@@ -86,7 +87,7 @@ module SidekiqUniqueJobs
         # When sidekiq/testing is loaded, the Sidekiq::Testing constant is
         # present and testing is enabled.
         def testing_enabled?
-          if Sidekiq.const_defined?('Testing') && Sidekiq::Testing.enabled? && !Sidekiq::Testing.inline?
+          if Sidekiq.const_defined?('Testing') && Sidekiq::Testing.enabled?
             require 'sidekiq-unique-jobs/testing'
             return true
           end
