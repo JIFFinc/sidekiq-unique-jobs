@@ -29,7 +29,7 @@ module SidekiqUniqueJobs
         end
 
         def unique_for_connection?(conn)
-          return true if Sidekiq::Testing.enabled? && Sidekiq::Testing.inline?
+          return true if Sidekiq.const_defined?('Testing') && Sidekiq::Testing.enabled? && Sidekiq::Testing.inline?
           unique = false
           conn.watch(payload_hash)
 
