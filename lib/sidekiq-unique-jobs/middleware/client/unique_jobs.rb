@@ -56,7 +56,7 @@ module SidekiqUniqueJobs
           # remove all unique keys for this queue if queue deleted
           queue = item['queue']
           Sidekiq.redis do |conn|
-            if !conn.exists("queue:#{queue}")
+            if conn.exists('queues') && !conn.sismember('queues', queue)
               # there is no queue, remove all uique keys
               prefix = SidekiqUniqueJobs::PayloadHelper.payload_prefix(queue)
               conn.keys("#{prefix}*").each do |key|
